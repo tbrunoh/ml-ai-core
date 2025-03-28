@@ -46,6 +46,9 @@ jobs:
           git tag $NEW_VERSION
           git push origin $NEW_VERSION
 
+      - name: Install dependencies
+        run: pip install --upgrade setuptools wheel twine
+  
       - name: Build the package
         run: python setup.py sdist bdist_wheel
 
