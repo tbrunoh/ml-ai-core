@@ -1,7 +1,7 @@
 import torch
 import subprocess
 import os
-
+import re
 
 class Utils:
     def __init__(self):
@@ -18,3 +18,7 @@ class Utils:
             print(f"Folder created: {folder_path}")
         else:
             print(f"Folder already exists: {folder_path}")
+
+    def extract_image_filename(image_url: str, ext:str = "png"):
+        match = re.search(rf"^[^-]+-(-*\d+)\.{ext}", image_url)
+        return match.group(1) if match else "unknown"
