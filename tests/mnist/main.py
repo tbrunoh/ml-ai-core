@@ -151,9 +151,9 @@ def main():
     x[14][col] = 200  # horizontal
   x /= 255.0
 
-  plt.tight_layout()
-  plt.imshow(x, cmap=plt.get_cmap('gray_r'))
-  plt.show()
+#   plt.tight_layout()
+#   plt.imshow(x, cmap=plt.get_cmap('gray_r'))
+#   plt.show()
 
   digits = ['zero', 'one', 'two', 'three', 'four', 'five', 
     'six', 'seven', 'eight', 'nine' ]
