@@ -1,5 +1,5 @@
 venv
-# tests/*/data/*
+tests/gan/data/*
 tests/*/models/*
 tests/*/logs/*
 *__pycache__
