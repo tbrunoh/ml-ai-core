@@ -9,7 +9,7 @@ with open("Requirements.txt", "r") as f:
     requirements = f.read().splitlines()
 
 setup(
-    name="ml_ai_core",
+    name="mlai",
     version=version,
     author="Nelson Kigen",
     author_email="nkigen@melaninluxe.ai",
