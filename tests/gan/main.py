@@ -6,6 +6,13 @@ import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 import numpy as np
 
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+
+from utils.utils import Utils
+
 # Generator
 class Generator(nn.Module):
     def __init__(self, noise_dim):
@@ -56,7 +63,7 @@ generator = Generator(NOISE_DIM)
 discriminator = Discriminator()
 
 # Device configuration
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = Utils.set_accelerator()
 generator = generator.to(device)
 discriminator = discriminator.to(device)
 

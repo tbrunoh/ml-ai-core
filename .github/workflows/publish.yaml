@@ -2,6 +2,7 @@ name: Publish to GitHub Packages
 
 on:
   push:
+    branches: main
     tags:
       - '*'  # Adjust if using another branch
 
@@ -23,28 +24,6 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.9"
-
-      - name: Auto-increment version using Git tags
-        run: |
-          # Get latest tag or set default version
-          LATEST_TAG=$(git describe --tags --abbrev=0 || echo "0.1.0")
-          
-          # Split the version into an array
-          IFS='.' read -r -a VERSION_PARTS <<< "$LATEST_TAG"
-          
-          # Increment patch version
-          VERSION_PARTS[2]=$((VERSION_PARTS[2] + 1))
-          
-          # Create new version string
-          NEW_VERSION="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.${VERSION_PARTS[2]}"
-          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-
-      - name: Tag new version
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git tag $NEW_VERSION
-          git push origin $NEW_VERSION
 
       - name: Install dependencies
         run: pip install --upgrade setuptools wheel twine
