@@ -2,7 +2,7 @@ import torch
 import subprocess
 import os
 import re
-
+import requests
 class Utils:
     def __init__(self):
         pass
@@ -22,3 +22,17 @@ class Utils:
     def extract_image_filename(image_url: str, ext:str = "png"):
         match = re.search(rf"^[^-]+-(-*\d+)\.{ext}", image_url)
         return match.group(1) if match else "unknown"
+    
+    def validate_url(url: str):
+        invalid_urls = []
+        try:
+            # Send a HEAD request to check the URL
+            response = requests.head(url, timeout=5)
+            if response.status_code == 200:
+                pass  # URL is valid
+            else:
+                invalid_urls.append(url)
+        except requests.RequestException:
+            invalid_urls.append(url)
+        
+        return invalid_urls
