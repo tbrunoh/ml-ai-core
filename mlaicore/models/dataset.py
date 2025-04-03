@@ -16,12 +16,15 @@ class BaseDataset(Dataset):
         raise NotImplementedError("Subclasses must implement forward method")
     
     def load_image(self,addr:any)->Image:
-        if addr.startswith("http://") or addr.startswith("https://"):
-            with urlopen(addr) as response:
-                image = Image.open(response).convert("RGB")
-        else:
-            image = Image.open(addr).convert("RGB")
-            
+        try:
+            if addr.startswith("http://") or addr.startswith("https://"):
+                with urlopen(addr) as response:
+                    image = Image.open(response).convert("RGB")
+            else:
+                image = Image.open(addr).convert("RGB")
+        except Exception as e:
+            print(f"Failed to load image from {addr}: {e}")
+            raise ValueError(f"Failed to load image from {addr}: {e}")
         return image
 
         
