@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import io
-
+import re
 
 class ImageUtils:
     def __init__(self):
@@ -9,3 +9,86 @@ class ImageUtils:
     def resize(imgPath:str,len:int,width:int):
         image = cv2.imread(imgPath)
         return cv2.resize(image,(len,width))
+    
+    def extract_image_filename(image_url: str, ext: str = "png"):
+        match = re.search(rf"^[^-]+-(-*\d+)\.{ext}", image_url)
+        return match.group(1) if match else "unknown"
+    
+    def extract_face(image_bytes: bytes) -> bytes:
+        try:
+            # Read the image from the bytes array
+            file_bytes = np.frombuffer(image_bytes, np.uint8)
+            image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+            if image is None:
+                raise ValueError("Image not found or invalid image file")
+            print(f"Image shape: {image.shape}")
+
+            # Ensure the image is in RGB format
+            if len(image.shape) == 3 and image.shape[2] == 3:
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            print("Image converted to RGB format")
+
+            # Load pre-trained face detector
+            face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+            if face_cascade.empty():
+                raise RuntimeError("Failed to load Haar cascade for face detection")
+            print("Haar cascade loaded successfully")
+
+            # Convert to grayscale for face detection
+            gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            print(f"Grayscale image shape: {gray.shape}")
+
+            # Detect faces
+            faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+            print(f"Number of faces detected: {len(faces)}")
+            if len(faces) == 0:
+                raise ValueError("No face detected in the image")
+
+            # Use the first detected face
+            x, y, w, h = faces[0]
+            print(f"Face coordinates: x={x}, y={y}, w={w}, h={h}")
+
+            # Extend the region to include the neck area
+            extended_y = max(0, y - int(h * 0.2))
+            extended_h = min(image.shape[0], y + h + int(h * 0.2)) - extended_y
+            cropped_image = image[extended_y:extended_y + extended_h, x:x + w]
+            print(f"Cropped image shape: {cropped_image.shape}")
+
+            # Validate the cropped image
+            if cropped_image.size == 0:
+                raise ValueError("Cropped image is empty. Check the face detection and cropping logic.")
+            
+            # Check if the cropped image has valid dimensions
+            if cropped_image.shape[0] <= 0 or cropped_image.shape[1] <= 0:
+                raise ValueError(f"Invalid cropped image dimensions: {cropped_image.shape}")
+
+            # Automatically determine the size as the smaller dimension of the cropped image
+            size = min(cropped_image.shape[:2])
+            print(f"Automatically determined size: {size}")
+
+            # Resize the cropped image to a square
+            print(f"Resizing cropped image to size: {size}x{size}")
+            resized_image = cv2.resize(cropped_image, (size, size))
+            print(f"Resized image shape: {resized_image.shape}")
+
+            # Add padding to make the image 512x512
+            target_size = 512
+            top = (target_size - resized_image.shape[0]) // 2
+            bottom = target_size - resized_image.shape[0] - top
+            left = (target_size - resized_image.shape[1]) // 2
+            right = target_size - resized_image.shape[1] - left
+            padded_image = cv2.copyMakeBorder(resized_image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=[0, 0, 0])
+            print(f"Padded image shape: {padded_image.shape}")
+
+            # Encode the processed image to PNG format
+            success, encoded_image = cv2.imencode('.png', padded_image)
+            if not success:
+                raise RuntimeError("Failed to encode the processed image")
+            print("Image encoded successfully")
+
+            # Return the encoded image as bytes
+            return encoded_image.tobytes()
+
+        except Exception as e:
+            print(f"Error processing image: {e}")
+            raise
