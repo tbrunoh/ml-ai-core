@@ -34,7 +34,7 @@ jobs:
       - name: Publish to GitHub Packages
         run: |
           echo "${{ secrets.GH_TOKEN }}" | python -m pip install --user --upgrade twine
-          python -m twine upload --repository-url https://upload.github.com/melanin-luxe/ml-ai-core/ dist/*
+          python -m twine upload --repository-url https://upload.github.com/tbrunoh/ml-ai-core/ dist/*
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.GH_TOKEN }}
